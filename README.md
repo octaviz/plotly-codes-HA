@@ -1,6 +1,6 @@
 # Plotly codes for Home Assistant 
 
-These codes are based on lovelace-plotly-graph-card 
+These codes are based on lovelace-plotly-graph-card  https://github.com/dbuezas/lovelace-plotly-graph-card
 
 This one below is for 5 sensors plus a "Now" sensor, with value indicators to the right of each sensor.
 
