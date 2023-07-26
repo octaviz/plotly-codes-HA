@@ -1,0 +1,215 @@
+type: custom:plotly-graph
+title: Sun + UV
+time_offset: 4h
+autorange_after_scroll: true
+config:
+  displaylogo: false
+  scrollZoom: true
+  displayModeBar: true
+entities:
+  - entity: sensor.current_uv_index
+    unit_of_measurement: UV
+    show_value: false
+    hovertemplate: >-
+      <span style="text-align: center; font-size: 20px;">%{y:.1f}
+      UV</span><br>%{x}<extra></extra>
+    texttemplate: ' %{y:.1f} UV'
+    yaxis: y1
+    marker:
+      color: rgba(165,165,0,0.9)
+    name: UV Index
+    line:
+      shape: spline
+      width: 3
+      color: ' #ffab3b '
+  - entity: sensor.porcentaje_sol
+    show_value: false
+    hovertemplate: >-
+      <span style="text-align: center; font-size:
+      20px;">%{y:.0f}%</span><br>%{x}<extra></extra>
+    yaxis: y2
+    fill: tozeroy
+    fillcolor: rgba(  255, 54, 2  ,.2)
+    textposition: bottom left
+    texttemplate: ' %{y:.0f} %'
+    name: Sol ☀
+    line:
+      width: 2
+      shape: spline
+      color: rgba (   255, 54, 2, 0.8)
+  - entity: sensor.openweathermap_casa_cloud_coverage
+    show_value: true
+    hovertemplate: >-
+      <span style="text-align: center; font-size:
+      20px;">%{y}</span><br>%{x}<extra></extra>
+    texttemplate: ☁️
+    textposition: top left
+    fill: tozeroy
+    fillcolor: rgba(  230, 218, 255  ,.1)
+    yaxis: y3
+    name: Tiempo
+    line:
+      width: 1
+      color: rgba( 2, 212, 255,0.9)
+  - entity: ''
+    name: Now
+    yaxis: y9
+    texttemplate: Now
+    rangemode: tozero
+    showlegend: false
+    show_value: false
+    line:
+      width: 3
+      color: rgba ( 131, 242, 4 , 0.6 )
+    x: $ex [Date.now(), Date.now()]
+    'y':
+      - 0
+      - 1
+defaults:
+  entity:
+    show_value: true
+fn: |
+  $fn({getFromConfig, vars})=> {
+    const range = getFromConfig("visible_range");
+    const width = range[1] - range[0];
+    vars.scroll = (label, p) => ({
+      args: [
+        {
+          layout: {
+            "xaxis.range": [range[0] + width*p, range[1] + width*p],
+          }
+        }, {
+          transition: {
+            duration: 150,
+          }
+        }
+      ],
+      label,
+      method: "animate",
+    })
+    vars.zoom = (label, h) => ({
+      args: [
+        {
+          layout: {
+            "xaxis.range": [Date.now()-1000*60*60*h, Date.now()],
+          }
+        }
+      ],
+      label,
+      method: "animate",
+    })
+  }      
+layout:
+  dragmode: pan
+  marker:
+    size: 20
+  fixedrange: true
+  xaxis:
+    tickangle: 0
+    minor:
+      nticks: 3
+      tickmode: auto
+      showgrid: false
+      tickformat: auto
+      gridcolor: '   #454545   '
+  yaxis:
+    showticklabels: true
+    tickangle: 0
+    minor:
+      nticks: 3
+      tickmode: auto
+      showgrid: true
+      gridcolor: '   #454545   '
+      tickformat: auto
+    range:
+      - 15
+      - 35
+  height: 400
+  margin:
+    l: 30
+    r: 60
+    t: 100
+  annotations:
+    - text: |-
+        $fn ({hass}) =>
+          "<span style='font-size: 16px;'><span style='font-weight: bold; color: #ffab3b'>"
+          + hass.states['sensor.uv_index_1_decimal'].state + "</span></span>UV<br>"
+          + hass.states['sensor.uv_index_max_1_decimal'].state + "</span></span>UV<br>"
+          + (hass.states['sensor.aire_acondicionado_temperature']  ? "<br><span style='font-size: 26px'>🔥</span>" : '')
+          
+      xref: x domain
+      yref: y1 domain
+      xanchor: center
+      yanchor: top
+      x: 1.09
+      'y': 0.7
+      showarrow: false
+    - text: |-
+        $fn ({hass}) =>
+          "<span style='font-size: 16px;'><span style='font-weight: normal; color: rgba(255, 54, 2  ,1)'>"
+          + hass.states['sensor.porcentaje_sol'].state + "</span></span>%<br>"
+          + hass.states['sensor.openweathermap_casa_cloud_coverage'].state + "</span></span>%☁️<br>"
+          + (hass.states['sensor.aire_acondicionado_temperature']  ? "<br><span style='font-size: 26px'>☀️</span>" : '')
+          
+      xref: x domain
+      yref: y1 domain
+      xanchor: center
+      yanchor: top
+      x: 1.09
+      'y': 0.35
+      showarrow: false
+    - text: |-
+        $fn ({hass}) =>
+          "<span style='font-size: 13px;'><span style='font-weight: normal;text-transform: capitalize; color: rgba(  18, 212, 255 ,0.9)'>"
+          + hass.states['sensor.openweathermap_casa_weather'].state + "</span></span><br>"
+          //HIDE+ (hass.states['sensor.aire_acondicionado_temperature']  ? "<br><br><br><span style='font-size: 26px'>🔥</span>" : '')
+          
+      xref: x domain
+      yref: y1 domain
+      xanchor: center
+      yanchor: top
+      x: 0.9
+      'y': 1.1
+      showarrow: false
+  yaxis2:
+    showticklabels: false
+    title: ''
+  updatemenus:
+    - buttons:
+        - $fn({vars}) => vars.scroll( '<', -.5)
+        - $fn({vars}) => vars.scroll( '>', .5)
+      direction: right
+      active: -1
+      pad:
+        r: 10
+        t: -90
+      type: buttons
+      x: 1
+      xanchor: right
+      'y': 1
+      yanchor: top
+    - buttons:
+        - $fn({vars}) => vars.zoom( '2w', 24*14)
+        - $fn({vars}) => vars.zoom( '2d', 24*2)
+        - $fn({vars}) => vars.zoom( '12h', 12)
+        - $fn({vars}) => vars.zoom( '3h', 3)
+        - $fn({vars}) => vars.zoom( '1h', 1)
+      direction: right
+      active: -1
+      pad:
+        r: 10
+        t: -90
+      type: buttons
+      x: 0
+      xanchor: left
+      'y': 1
+      yanchor: top
+  font:
+    family: Roboto,Noto,sans-serif
+    size: 12
+    color: $fn ({css_vars}) => css_vars['primary-text-color']
+  paper_bgcolor: rgba(0, 0, 0, 0.4)
+  plot_bgcolor: rgba(0, 0, 0, 0)
+  legend:
+    itemwidth: 2
+hours_to_show: 30
